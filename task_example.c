@@ -6,72 +6,64 @@
  */
 
 
-/* XDCtools Header files */
-#include <xdc/std.h>
-#include <xdc/runtime/System.h>
-
-/* BIOS Header files */
-#include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/knl/Clock.h>
-#include <ti/sysbios/knl/Task.h>
-
-/* TI-RTOS Header files */
-#include <ti/drivers/PIN.h>
-#include <ti/drivers/pin/PINCC26XX.h> //SPECIFIC FOR THE CC2650 SENSOR TAG
 
 
-/* Board Header files */
-#include "Board.h"
-
-// Task needs its own stack memory
+// Taski tarvitsee oman sisäisen pinomuistin
 #define STACKSIZE 512
 Char myTaskStack[STACKSIZE];
 
-// Task implementation
+
+// Taskin toteutusfunktio
 Void myTaskFxn(UArg arg0, UArg arg1) {
 
    // Taskin ikuinen elämä
    while (1) {
-      System_printf("My arguments are %ld ja %ld\n", arg0, arg1);
+      System_printf("This is task %ld\n", arg0);
       System_flush();
 
-      // Politely go to sleep for a moment
+      // Kohteliaasti nukkumaan hetkeksi
       Task_sleep(1000000L / Clock_tickPeriod);
    }
 }
 
 int main(void) {
 
-   // Creating task parameters
+   // Taskeihin liittyviä tietorakenteita
    Task_Params myTaskParams;
    Task_Handle myTaskHandle;
+   Task_Params myTask2Params;
+   Task_Handle myTask2Handle;
 
-   // Start device
+   // Laitteen alustus
    Board_initGeneral();
 
-   // Initialize task main parameters
+   // Alustetaan taskin suoritusparametrit
    Task_Params_init(&myTaskParams);
-   // Define task stack memory
+   Task_Params_init(&myTask2Params);
+   // Osoitetaan taskille sen pinomuisti
    myTaskParams.stackSize = STACKSIZE;
    myTaskParams.stack = &myTaskStack;
-   // Set task priority
+   myTask2Params.stackSize = STACKSIZE;
+   myTask2Params.stack = &myTask2Stack;
+   // Asetetaan taskin prioriteetti
    myTaskParams.priority = 2;
-   // Define arguments for the task.
-   myTaskParams.arg0 = 127; // Argumentti 1
-   myTaskParams.arg1 = 0xFFFF; // Argumentti 2
+   myTask2Params.priority = 1;
+   myTaskParams.arg0 = 1;
+   myTask2Params.arg0 = 2;
 
-   // Create task
+
+   // Luodaan taski
    myTaskHandle = Task_create((Task_FuncPtr)myTaskFxn, &myTaskParams, NULL);
-   if (myTaskHandle == NULL) {
+   myTask2Handle = Task_create((Task_FuncPtr)myTaskFxn, &myTask2Params, NULL);
+   if (myTaskHandle == NULL || myTask2Handle == NULL) {
       System_abort("Task create failed");
    }
 
-    // Greetings from console
-    System_printf("Creating a task!\n");
+    // Terveisiä konsolille
+    System_printfss("Creating task!\n");
     System_flush();
 
-   // Program ready
+   // Ohjelma käynnistyy
    BIOS_start();
 
    return (0);
-}
