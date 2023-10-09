@@ -12,7 +12,8 @@
 #define STACKSIZE 512
 Char myTaskStack[STACKSIZE];
 
-
+enum state {IDLE, READY};
+enum state program_state= IDLE;
 // Taskin toteutusfunktio
 Void myTaskFxn(UArg arg0, UArg arg1) {
 
