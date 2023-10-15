@@ -22,7 +22,6 @@
 #include <ti/drivers/PIN.h>
 #include <ti/drivers/pin/PINCC26XX.h> //SPECIFIC FOR THE CC2650 SENSOR TAG
 
-#include <string.h>
 #include <ti/drivers/UART.h>
 
 
@@ -30,16 +29,16 @@
 #include "Board.h"
 
 // Task needs its own stack memory
-#define STACKSIZE 512
+#define STACKSIZE 1024
 Char myTaskStack[STACKSIZE];
 enum state {IDLE=0, READY};
-enum state programState;
+enum state programState=IDLE;
 
 
 // Taskifunktio
 Void serialTask(UArg arg0, UArg arg1) {
 
-   Char buff[30];
+   Char buff[20];
 
    // UART-kirjaston asetukset
    UART_Handle uart;
@@ -67,7 +66,7 @@ Void serialTask(UArg arg0, UArg arg1) {
 
       // Let's send the current state
       sprintf(buff,"Current state: %1d\n\r",programState);
-      UART_write(uart, buff, 18);
+      UART_write(uart, buff, strlen(buff);
       // Let's sleep for one second
       Task_sleep(1000000 / Clock_tickPeriod);
    }
@@ -75,7 +74,6 @@ Void serialTask(UArg arg0, UArg arg1) {
 
 
 int main(void) {
-   programState = IDLE;
    // Creating task parameters
    Task_Params myTaskParams;
    Task_Handle myTaskHandle;
